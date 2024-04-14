@@ -12,11 +12,8 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -25,11 +22,9 @@ import com.jsoft.adderproduct.databinding.ActivityMainBinding
 import com.skydoves.colorpickerview.ColorEnvelope
 import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.util.UUID
 
@@ -98,52 +93,58 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun updateImages() {
-        binding.tvSelectedImages.text = selectedImages.size.toString()
-    }
-
-    private fun updateColors() {
-        var colors = ""
-        selectedColors.forEach {
-            colors = "$colors ${Integer.toHexString(it)}"
-        }
-        binding.tvSelectedColors.text = colors
-    }
-
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.toolbar_menu, menu)
-        return super.onCreateOptionsMenu(menu)
+        return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        //1
         if (item.itemId == R.id.save_product) {
-            val productValidation = productValidation()
+            val productValidation = validateInformation()
             if (!productValidation) {
                 Toast.makeText(this, "Check your inputs", Toast.LENGTH_SHORT).show()
+                return false
             }
-
-            saveProduct()
+            saveProducts() {
+                Log.d("test", it.toString())
+            }
         }
         return super.onOptionsItemSelected(item)
     }
 
-    private fun saveProduct() {
+
+
+
+    //2
+    private fun validateInformation(): Boolean {
+        if (selectedImages.isEmpty())
+            return false
+        if (binding.edName.text.toString().trim().isEmpty())
+            return false
+        if (binding.edCategory.text.toString().trim().isEmpty())
+            return false
+        if (binding.edPrice.text.toString().trim().isEmpty())
+            return false
+        return true
+    }
+
+    //3
+    private fun saveProducts(state: (Boolean) -> Unit) {
+        val sizes = getSizesList(binding.edSizes.text.toString().trim())
+        val imagesByteArrays = getImagesByteArrays() //7
         val name = binding.edName.text.toString().trim()
+        val images = mutableListOf<String>()
         val category = binding.edCategory.text.toString().trim()
+        val productDescription = binding.edDescription.text.toString().trim()
         val price = binding.edPrice.text.toString().trim()
         val offerPercentage = binding.edOfferPercentage.text.toString().trim()
-        val description = binding.edDescription.text.toString().trim()
-        val sizes = getSizesList(binding.edSizes.text.toString().trim())
-        val imagesByteArrays = getImagesByteArrays()
 
-        val images = mutableListOf<String>()
-
-        lifecycleScope.launch(Dispatchers.IO) {
-            withContext(Dispatchers.Main) {
-                showLoading()
-            }
+        lifecycleScope.launch {
+            showLoading()
             try {
                 async {
+                    Log.d("test1", "test")
                     imagesByteArrays.forEach {
                         val id = UUID.randomUUID().toString()
                         launch {
@@ -153,14 +154,13 @@ class MainActivity : AppCompatActivity() {
                             images.add(downloadUrl)
                         }
                     }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                withContext(Dispatchers.Main) {
-                    hideLoading()
-                }
+                }.await()
+            } catch (e: java.lang.Exception) {
+                hideLoading()
+                state(false)
             }
 
+            Log.d("test2", "test")
 
             val product = Product(
                 UUID.randomUUID().toString(),
@@ -168,19 +168,20 @@ class MainActivity : AppCompatActivity() {
                 category,
                 price.toFloat(),
                 if (offerPercentage.isEmpty()) null else offerPercentage.toFloat(),
-                if (description.isEmpty()) null else description,
+                if (productDescription.isEmpty()) null else productDescription,
                 selectedColors,
                 sizes,
                 images
             )
 
             firestore.collection("Products").add(product).addOnSuccessListener {
+                state(true)
                 hideLoading()
             }.addOnFailureListener {
                 Log.e("test2", it.message.toString())
+                state(false)
                 hideLoading()
             }
-
         }
     }
 
@@ -190,6 +191,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun showLoading() {
         binding.progressbar.visibility = View.VISIBLE
+
     }
 
     private fun getImagesByteArrays(): List<ByteArray> {
@@ -197,26 +199,30 @@ class MainActivity : AppCompatActivity() {
         selectedImages.forEach {
             val stream = ByteArrayOutputStream()
             val imageBmp = MediaStore.Images.Media.getBitmap(contentResolver, it)
-            if (imageBmp.compress(Bitmap.CompressFormat.JPEG, 100, stream)) {
-                imagesByteArray.add(stream.toByteArray())
+            if (imageBmp.compress(Bitmap.CompressFormat.JPEG, 85, stream)) {
+                val imageAsByteArray = stream.toByteArray()
+                imagesByteArray.add(imageAsByteArray)
             }
         }
         return imagesByteArray
     }
 
-    // S,M, L, XL
-    private fun getSizesList(sizesStr: String): List<String>? {
-        if (sizesStr.isEmpty()) return null
-        val sizesList = sizesStr.split(",")
+    private fun getSizesList(sizes: String): List<String>? {
+        if (sizes.isEmpty())
+            return null
+        val sizesList = sizes.split(",").map { it.trim() }
         return sizesList
     }
 
-    private fun productValidation(): Boolean {
-        if (binding.edPrice.text.toString().trim().isEmpty()) return false
-        if (binding.edName.text.toString().trim().isEmpty()) return false
-        if (binding.edCategory.text.toString().trim().isEmpty()) return false
-        if (selectedImages.isEmpty()) return false
-
-        return true
+    //5
+    private fun updateColors() {
+        var colors = ""
+        selectedColors.forEach {
+            colors = "$colors ${Integer.toHexString(it)}, "
+        }
+        binding.tvSelectedColors.text = colors
     }
-}
+
+    private fun updateImages() {
+        binding.tvSelectedImages.setText(selectedImages.size.toString())
+    }}
