@@ -41,7 +41,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-
         //4
         binding.buttonColorPicker.setOnClickListener {
             ColorPickerDialog
@@ -60,7 +59,6 @@ class MainActivity : AppCompatActivity() {
                     colorPicker.dismiss()
                 }.show()
         }
-
 
         val selectImagesActivityResult =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -112,9 +110,6 @@ class MainActivity : AppCompatActivity() {
         }
         return super.onOptionsItemSelected(item)
     }
-
-
-
 
     //2
     private fun validateInformation(): Boolean {
