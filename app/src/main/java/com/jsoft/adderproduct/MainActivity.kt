@@ -64,7 +64,6 @@ class MainActivity : AppCompatActivity() {
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == Activity.RESULT_OK) {
                     val intent = result.data
-
                     //Multiple images selected
                     if (intent?.clipData != null) {
                         val count = intent.clipData?.itemCount ?: 0
@@ -168,7 +167,6 @@ class MainActivity : AppCompatActivity() {
                 sizes,
                 images
             )
-
             firestore.collection("Products").add(product).addOnSuccessListener {
                 state(true)
                 hideLoading()
@@ -201,14 +199,12 @@ class MainActivity : AppCompatActivity() {
         }
         return imagesByteArray
     }
-
     private fun getSizesList(sizes: String): List<String>? {
         if (sizes.isEmpty())
             return null
         val sizesList = sizes.split(",").map { it.trim() }
         return sizesList
     }
-
     //5
     private fun updateColors() {
         var colors = ""
@@ -217,7 +213,7 @@ class MainActivity : AppCompatActivity() {
         }
         binding.tvSelectedColors.text = colors
     }
-
     private fun updateImages() {
         binding.tvSelectedImages.setText(selectedImages.size.toString())
-    }}
+    }
+}
