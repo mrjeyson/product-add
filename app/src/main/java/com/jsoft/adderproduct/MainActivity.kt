@@ -177,7 +177,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
     private fun hideLoading() {
         binding.progressbar.visibility = View.INVISIBLE
     }
@@ -186,7 +185,6 @@ class MainActivity : AppCompatActivity() {
         binding.progressbar.visibility = View.VISIBLE
 
     }
-
     private fun getImagesByteArrays(): List<ByteArray> {
         val imagesByteArray = mutableListOf<ByteArray>()
         selectedImages.forEach {
