@@ -43,9 +43,7 @@ class MainActivity : AppCompatActivity() {
 
         //4
         binding.buttonColorPicker.setOnClickListener {
-            ColorPickerDialog
-                .Builder(this)
-                .setTitle("Product color")
+            ColorPickerDialog.Builder(this).setTitle("Product color")
                 .setPositiveButton("Select", object : ColorEnvelopeListener {
 
                     override fun onColorSelected(envelope: ColorEnvelope?, fromUser: Boolean) {
@@ -112,14 +110,10 @@ class MainActivity : AppCompatActivity() {
 
     //2
     private fun validateInformation(): Boolean {
-        if (selectedImages.isEmpty())
-            return false
-        if (binding.edName.text.toString().trim().isEmpty())
-            return false
-        if (binding.edCategory.text.toString().trim().isEmpty())
-            return false
-        if (binding.edPrice.text.toString().trim().isEmpty())
-            return false
+        if (selectedImages.isEmpty()) return false
+        if (binding.edName.text.toString().trim().isEmpty()) return false
+        if (binding.edCategory.text.toString().trim().isEmpty()) return false
+        if (binding.edPrice.text.toString().trim().isEmpty()) return false
         return true
     }
 
@@ -177,6 +171,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
     private fun hideLoading() {
         binding.progressbar.visibility = View.INVISIBLE
     }
@@ -185,6 +180,7 @@ class MainActivity : AppCompatActivity() {
         binding.progressbar.visibility = View.VISIBLE
 
     }
+
     private fun getImagesByteArrays(): List<ByteArray> {
         val imagesByteArray = mutableListOf<ByteArray>()
         selectedImages.forEach {
@@ -197,12 +193,13 @@ class MainActivity : AppCompatActivity() {
         }
         return imagesByteArray
     }
+
     private fun getSizesList(sizes: String): List<String>? {
-        if (sizes.isEmpty())
-            return null
+        if (sizes.isEmpty()) return null
         val sizesList = sizes.split(",").map { it.trim() }
         return sizesList
     }
+
     //5
     private fun updateColors() {
         var colors = ""
@@ -211,6 +208,7 @@ class MainActivity : AppCompatActivity() {
         }
         binding.tvSelectedColors.text = colors
     }
+
     private fun updateImages() {
         binding.tvSelectedImages.setText(selectedImages.size.toString())
     }
