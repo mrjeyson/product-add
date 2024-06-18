@@ -195,6 +195,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+
     private fun getSizesList(sizes: String): List<String>? {
         if (sizes.isEmpty()) return null
         val sizesList = sizes.split(",").map { it.trim() }
