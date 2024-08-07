@@ -30,6 +30,8 @@ import java.util.UUID
 
 class MainActivity : AppCompatActivity() {
 
+
+
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
     val selectedColors = mutableListOf<Int>()
     var selectedImages = mutableListOf<Uri>()
