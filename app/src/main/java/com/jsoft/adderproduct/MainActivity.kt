@@ -29,6 +29,7 @@ import java.io.ByteArrayOutputStream
 import java.util.UUID
 
 class MainActivity : AppCompatActivity() {
+
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
     val selectedColors = mutableListOf<Int>()
     var selectedImages = mutableListOf<Uri>()
@@ -39,7 +40,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-
         //4
         binding.buttonColorPicker.setOnClickListener {
             ColorPickerDialog.Builder(this).setTitle("Product color")
