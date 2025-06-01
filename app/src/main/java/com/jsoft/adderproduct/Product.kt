@@ -2,7 +2,6 @@ package com.jsoft.adderproduct
 
 data class Product(
 
-
     val id: String,
     val name: String,
     val category: String,
